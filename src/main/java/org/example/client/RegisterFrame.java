@@ -5,6 +5,7 @@ import org.example.common.BankService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.rmi.RemoteException;
 
 public class RegisterFrame extends JFrame {
     private JTextField usernameField;
@@ -83,52 +84,48 @@ public class RegisterFrame extends JFrame {
     }
 
     private void performRegister() {
-        String username = usernameField.getText().trim();
+        String username = usernameField.getText().trim(); // Chỉ để hiển thị
         String pass1 = new String(passwordField.getPassword());
         String pass2 = new String(confirmField.getPassword());
-        String phone = phoneField.getText().trim();
+        String sdt = phoneField.getText().trim(); // DÙNG sdt
 
-        // Kiểm tra rỗng
-        if (username.isEmpty() || pass1.isEmpty() || phone.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+        if (username.isEmpty() || pass1.isEmpty() || sdt.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Kiểm tra mật khẩu
         if (!pass1.equals(pass2)) {
-            JOptionPane.showMessageDialog(this, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Mật khẩu không khớp!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Kiểm tra định dạng số điện thoại: 10 chữ số
-        if (!phone.matches("\\d{10}")) {
-            JOptionPane.showMessageDialog(this, "Phone number must be 10 digits!", "Invalid Phone", JOptionPane.ERROR_MESSAGE);
+        if (!sdt.matches("\\d{10}")) {
+            JOptionPane.showMessageDialog(this, "SĐT phải có 10 chữ số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         BankService service = BankClient.getService();
         if (service == null) {
-            JOptionPane.showMessageDialog(this, "Cannot connect to server.", "Connection Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Không kết nối được server!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try {
-            Boolean result = service.register(username, phone, pass1); // ĐÚNG thứ tự
+            boolean success = service.register(sdt, pass1); // ĐÚNG: (sdt, password)
 
-            if (result != null && result) {
+            if (success) {
                 JOptionPane.showMessageDialog(this,
-                        "Registration successful!\nUsername: " + username + "\nPhone: " + phone,
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                        "Đăng ký thành công!\nSĐT: " + sdt,
+                        "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
                 new LoginFrame();
             } else {
                 JOptionPane.showMessageDialog(this,
-                        "Phone number already in use!", "Registration Failed", JOptionPane.ERROR_MESSAGE);
+                        "SĐT đã được sử dụng!", "Đăng ký thất bại", JOptionPane.ERROR_MESSAGE);
             }
 
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Server error: " + ex.getMessage(),
-                    "RMI Error", JOptionPane.ERROR_MESSAGE);
+        } catch (RemoteException ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi server: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
     }

@@ -7,12 +7,11 @@ import java.awt.*;
 import java.rmi.RemoteException;
 
 public class MainFrame extends JFrame {
-    private String username;
-    private JLabel balanceLabel;
     private String currentPhone;
+    private JLabel balanceLabel;
 
     public MainFrame(String username) {
-        this.username = username;
+        this.currentPhone = username;
         setTitle("Bank - " + username);
         setSize(500, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,7 +25,7 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout(10, 10));
 
         // Header
-        JLabel welcomeLabel = new JLabel("Welcome, " + username + "!", SwingConstants.CENTER);
+        JLabel welcomeLabel = new JLabel("Welcome, " + currentPhone + "!", SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
         add(welcomeLabel, BorderLayout.NORTH);
 
@@ -59,7 +58,7 @@ public class MainFrame extends JFrame {
     private void loadBalance() {
         BankService service = BankClient.getService();
         try {
-            double balance = service.getBalance(username);
+            double balance = service.getBalance(currentPhone);
             balanceLabel.setText(String.format("$%.2f", balance));
         } catch (RemoteException ex) {
             balanceLabel.setText("Error");
@@ -74,7 +73,7 @@ public class MainFrame extends JFrame {
                 double amount = Double.parseDouble(amountStr);
                 if (amount <= 0) throw new NumberFormatException();
                 BankService service = BankClient.getService();
-                if (service.deposit(username, amount)) {
+                if (service.deposit(currentPhone, amount)) {
                     JOptionPane.showMessageDialog(this, "Deposited $" + amount);
                     loadBalance();
                 }
@@ -91,7 +90,7 @@ public class MainFrame extends JFrame {
                 double amount = Double.parseDouble(amountStr);
                 if (amount <= 0) throw new NumberFormatException();
                 BankService service = BankClient.getService();
-                if (service.withdraw(username, amount)) {
+                if (service.withdraw(currentPhone, amount)) {
                     JOptionPane.showMessageDialog(this, "Withdrew $" + amount);
                     loadBalance();
                 } else {
